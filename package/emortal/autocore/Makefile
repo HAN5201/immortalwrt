@@ -14,6 +14,7 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_TARGET_bcm53xx
 
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/target.mk
 
 define Package/autocore-arm
   TITLE:=ARM auto core script.
@@ -35,23 +36,34 @@ define Build/Compile
 endef
 
 define Package/autocore/install/Default
-	$(INSTALL_DIR) $$(1)/etc
-	$(CP) ./files/generic/index.htm $$(1)/etc/
+	$(INSTALL_DIR) $(1)/etc
+	$(CP) ./files/generic/10_system.js $(1)/etc/rpcd_10_system.js
+	$(CP) ./files/generic/luci $(1)/etc/rpcd_luci
 
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/generic/090-cover-index_htm $$(1)/etc/uci-defaults/
+	$(INSTALL_BIN) ./files/generic/090-cover-index_files $(1)/etc/uci-defaults/
 
 	$(INSTALL_DIR) $(1)/sbin
-	$(INSTALL_BIN) ./files/generic/cpuinfo $$(1)/sbin/
-	$(INSTALL_BIN) ./files/generic/ethinfo $$(1)/sbin/
+	$(INSTALL_BIN) ./files/generic/cpuinfo $(1)/sbin/
+	$(INSTALL_BIN) ./files/generic/ethinfo $(1)/sbin/
+
+	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
+	$(CP) ./files/generic/luci-mod-status-autocore.json $(1)/usr/share/rpcd/acl.d/
+
+	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/status/include
+	$(INSTALL_DATA) ./files/generic/21_ethinfo.js $(1)/www/luci-static/resources/view/status/include/
 endef
 
 define Package/autocore-arm/install
 	$(call Package/autocore/install/Default,$(1))
+
+ifneq ($(filter ipq% %mt7622, $(TARGETID)),)
+        $(INSTALL_BIN) ./files/arm/tempinfo $(1)/sbin/
+endif
 endef
 
 define Package/autocore-x86/install
-	$(call Package/autocore/install/Default)
+	$(call Package/autocore/install/Default,$(1))
 
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/x86/autocore $(1)/etc/init.d/

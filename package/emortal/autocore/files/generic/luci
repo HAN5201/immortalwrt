@@ -633,7 +633,7 @@ local methods = {
 			cpuinfo.cpuinfo = sys.exec("/sbin/cpuinfo")
 
 			if (cpuinfo.cpuinfo == nil) or (cpuinfo.cpuinfo == "") then
-				cpuinfo.cpuinfo = "2.33 MHz +2.33 C"
+				cpuinfo.cpuinfo = "? x ? (2.33MHz, 2.33°C)"
 			end
 
 			return cpuinfo
@@ -666,6 +666,16 @@ local methods = {
 
 			return onlineusers
 
+		end
+	},
+
+	getTempInfo = {
+		call = function()
+			local sys = require "luci.sys"
+			local tempinfo = {}
+
+			tempinfo.tempinfo = sys.exec("/sbin/tempinfo 2>/dev/null")
+			return tempinfo
 		end
 	}
 }
